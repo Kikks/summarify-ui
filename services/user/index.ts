@@ -1,5 +1,9 @@
 import { patchRequest, postRequest } from '@/lib/api/calls';
-import { UpdateUserPayload, ChangePasswordPayload } from './payload';
+import {
+  UpdateUserPayload,
+  ChangePasswordPayload,
+  RegisterUserPayload,
+} from './payload';
 
 export const updateUser = (payload: UpdateUserPayload) => {
   return patchRequest({
@@ -11,6 +15,13 @@ export const updateUser = (payload: UpdateUserPayload) => {
 export const changeUserPassword = (payload: ChangePasswordPayload) => {
   return postRequest({
     url: '/auth/change-password',
+    data: payload,
+  });
+};
+
+export const registerUser = (payload: RegisterUserPayload) => {
+  return postRequest({
+    url: '/auth/register',
     data: payload,
   });
 };

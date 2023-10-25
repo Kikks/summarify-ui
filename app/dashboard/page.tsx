@@ -201,6 +201,12 @@ const Home = () => {
                   />
                 ))}
           </motion.div>
+
+          {recentDocuments && recentDocuments?.length === 0 && (
+            <p className="py-20 text-center text-sm font-medium">
+              You do not have any recent documents.
+            </p>
+          )}
         </div>
       </main>
     </CustomScrollbar>

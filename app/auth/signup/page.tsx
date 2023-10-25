@@ -7,6 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import toaster from '@/lib/toaster';
+import { useMutation } from '@tanstack/react-query';
+import { registerUser } from '@/services/user';
+import { useRouter } from 'next/navigation';
 
 const containerVariant = {
   hidden: {
@@ -34,14 +38,57 @@ const itemVariant = {
   },
 };
 
-const Login = () => {
+const Signup = () => {
+  const router = useRouter();
   const [payload, setPayload] = useState({
     email: '',
     password: '',
+    firstName: '',
+    lastName: '',
+  });
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: registerUser,
+    onSuccess: () => {
+      toaster.success({
+        message: 'Account created successfully',
+      });
+      router.push('/auth/login');
+    },
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPayload((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSumbit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (
+      payload.email.trim() === '' ||
+      payload.password.trim() === '' ||
+      payload.firstName.trim() === '' ||
+      payload.lastName.trim() === ''
+    ) {
+      toaster.error({
+        message: 'Please fill all the fields',
+      });
+      return;
+    }
+
+    const emailRegex = new RegExp(
+      // eslint-disable-next-line no-control-regex
+      '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$',
+    );
+
+    if (!emailRegex.test(payload.email)) {
+      toaster.error({
+        message: 'Please enter a valid email address',
+      });
+      return;
+    }
+
+    mutate(payload);
   };
 
   return (
@@ -80,6 +127,7 @@ const Login = () => {
         <motion.form
           variants={itemVariant}
           className="flex w-full flex-col space-y-3"
+          onSubmit={handleSumbit}
         >
           <div className="grid w-full items-center gap-1.5">
             <Label htmlFor="email">First Name</Label>
@@ -88,6 +136,7 @@ const Login = () => {
               name="firstName"
               placeholder="Enter your first name"
               required
+              value={payload.firstName}
               onChange={handleChange}
             />
           </div>
@@ -99,6 +148,7 @@ const Login = () => {
               name="lastName"
               placeholder="Enter your last name"
               required
+              value={payload.lastName}
               onChange={handleChange}
             />
           </div>
@@ -110,6 +160,7 @@ const Login = () => {
               name="email"
               placeholder="Enter your email"
               required
+              value={payload.email}
               onChange={handleChange}
             />
           </div>
@@ -121,12 +172,18 @@ const Login = () => {
               name="password"
               placeholder="Enter your email"
               required
+              value={payload.password}
               onChange={handleChange}
             />
           </div>
 
-          <Button type="submit" variant="default" className="!mt-5 w-full">
-            Sign up
+          <Button
+            type="submit"
+            variant="default"
+            className="!mt-5 w-full"
+            disabled={isPending}
+          >
+            {isPending ? 'Creating account...' : 'Create account'}
           </Button>
         </motion.form>
       </motion.div>
@@ -145,4 +202,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
