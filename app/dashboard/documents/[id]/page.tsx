@@ -10,6 +10,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import queryKeys from '@/lib/api/queryKeys';
 import {
   deleteDocument,
+  generateSummary,
   getDocument,
   getDocumentConversations,
 } from '@/services/documents';
@@ -71,8 +72,23 @@ const Document: FC<PageProps> = ({ params }) => {
     },
   });
 
+  const { mutate: generateSummaryMutate, isPending: generateIsLoading } =
+    useMutation({
+      mutationFn: generateSummary,
+      onSuccess: () => {
+        refetch();
+        toaster.success({
+          message: 'Summary generation in progress',
+        });
+      },
+    });
+
   const handleDelete = () => {
     mutate(params.id);
+  };
+
+  const handleGenerateSummary = () => {
+    generateSummaryMutate(params.id);
   };
 
   useEffect(() => {
@@ -135,6 +151,8 @@ const Document: FC<PageProps> = ({ params }) => {
               {...document}
               onDeleteClicked={() => setDeleteModalIsOpen(true)}
               onSave={() => refetch()}
+              onGenerateSummary={handleGenerateSummary}
+              generateIsLoading={generateIsLoading}
             />
             <Chat
               documentId={params.id}

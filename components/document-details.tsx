@@ -9,6 +9,7 @@ import {
   Calendar,
   Check,
   Edit,
+  Hourglass,
   Loader2,
   MoreHorizontal,
   Trash2,
@@ -29,6 +30,8 @@ import { updateDocument } from '@/services/documents';
 interface DocumentDetailsProps extends IDocument {
   onDeleteClicked?: () => void;
   onSave?: (update: Partial<IDocument>) => void;
+  onGenerateSummary?: () => void;
+  generateIsLoading?: boolean;
 }
 
 const DocumentDetails: FC<DocumentDetailsProps> = ({
@@ -36,10 +39,13 @@ const DocumentDetails: FC<DocumentDetailsProps> = ({
   title,
   content,
   summary,
+  summaryStatus,
   fileType,
   createdAt,
   onDeleteClicked,
   onSave,
+  onGenerateSummary,
+  generateIsLoading,
 }) => {
   const [newTitle, setNewTitle] = useState(title);
   const [isEditing, setIsEditing] = useState(false);
@@ -173,12 +179,44 @@ const DocumentDetails: FC<DocumentDetailsProps> = ({
               <TabsTrigger value="summary">Summary</TabsTrigger>
               <TabsTrigger value="full-text">Full Text</TabsTrigger>
             </TabsList>
-            <TabsContent value="summary">
-              <AnimatedParagraph
-                paragraphs={(summary?.content || '').split('\n')}
-              />
+            <TabsContent value="summary" className="break-words">
+              {(summaryStatus === 'completed' || !summaryStatus) && (
+                <AnimatedParagraph
+                  paragraphs={(summary?.content || '').split('\n')}
+                />
+              )}
+
+              {summaryStatus === 'pending' && (
+                <div className="flex w-full flex-col items-center space-y-5 py-10 text-center">
+                  <div className="flex h-32 w-32 items-center justify-center rounded-full bg-secondary">
+                    <Hourglass size={40} className="animate-pulse" />
+                  </div>
+
+                  <span className="max-w-[40ch] text-xs text-secondary-foreground">
+                    Your summary is processing.
+                    <br />
+                    Please check back in a few minutes.
+                  </span>
+                </div>
+              )}
+
+              {summaryStatus === 'failed' && (
+                <div className="flex w-full flex-col items-center space-y-5 py-10 text-center">
+                  <span className="max-w-[40ch] text-sm text-secondary-foreground">
+                    Something went wrong while trying to summarize your
+                    document. Do you want to try again?
+                  </span>
+
+                  <Button
+                    disabled={generateIsLoading}
+                    onClick={onGenerateSummary}
+                  >
+                    {generateIsLoading ? 'Generating...' : 'Generate Summary'}
+                  </Button>
+                </div>
+              )}
             </TabsContent>
-            <TabsContent value="full-text">
+            <TabsContent value="full-text" className="break-words">
               <AnimatedParagraph paragraphs={(content || '').split('\n')} />
             </TabsContent>
           </Tabs>

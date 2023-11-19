@@ -74,3 +74,10 @@ export const createDocumentConversation = ({
     data,
   });
 };
+
+export const generateSummary = (id: string) => {
+  return postRequest({
+    url: `/documents/${id}/summary`,
+    data: {},
+  });
+};

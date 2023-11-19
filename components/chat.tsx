@@ -227,6 +227,7 @@ const Chat: FC<IChatProps> = ({
               placeholder="Ask a question..."
               className="flex-1 text-xs"
               value={message}
+              disabled={isPending}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
